@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المشاريع الهندسية</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+        }
+        
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .menu {
+            display: flex;
+            justify-content: center;
+            background-color: var(--dark-color);
+            padding: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .menu button {
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .menu button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .menu button.active {
+            background-color: var(--accent-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+        
+        .content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        
+        th {
+            background-color: var(--light-color);
+            font-weight: bold;
+        }
+        
+        input[type="text"], 
+        input[type="number"], 
+        input[type="date"],
+        input[type="time"],
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .signature-pad {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .project-info {
+            background-color: var(--light-color);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .project-info h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .print-only {
+                display: block;
+            }
+            body {
+                background-color: white;
+                font-size: 12pt;
+            }
+            .content {
+                box-shadow: none;
+                padding: 0;
+                animation: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1>نظام إدارة المشاريع الهندسية</h1>
+        <p class="no-print">أداة متكاملة لإدارة أعمال المكتب الفني</p>
+    </div>
+
+    <div class="menu no-print">
+        <button onclick="showContent('dashboard')" class="active">لوحة التحكم</button>
+        <button onclick="showContent('inspection')">محاضر الاستلام</button>
+        <button onclick="showContent('dailyReport')">تقارير الموقع</button>
+        <button onclick="showContent('boq')">جدول الكميات</button>
+        <button onclick="showContent('boqItems')">بنود المقايسة</button>
+        <button onclick="showContent('reports')">التقارير</button>
+        <button onclick="showContent('settings')">الإعدادات</button>
+    </div>
+
+    <div class="container">
+        <!-- لوحة التحكم -->
+        <div id="dashboard" class="content">
+            <h2>لوحة التحكم</h2>
+            <div class="project-info">
+                <h3>معلومات المشروع الحالي</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="currentProject">اسم المشروع:</label>
+                        <input type="text" id="currentProject" placeholder="أدخل اسم المشروع">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectLocation">موقع المشروع:</label>
+                        <input type="text" id="projectLocation" placeholder="أدخل موقع المشروع">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectClient">صاحب العمل:</label>
+                        <input type="text" id="projectClient" placeholder="أدخل اسم صاحب العمل">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="projectStart">تاريخ البدء:</label>
+                        <input type="date" id="projectStart">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectEnd">تاريخ الانتهاء:</label>
+                        <input type="date" id="projectEnd">
+                    </div>
+                    <div class="form-group">
+                        <label for="projectStatus">حالة المشروع:</label>
+                        <select id="projectStatus">
+                            <option value="planning">في مرحلة التخطيط</option>
+                            <option value="execution">قيد التنفيذ</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="onHold">موقوف</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="saveProjectInfo()">حفظ معلومات المشروع</button>
+                </div>
+            </div>
+            
+            <div class="quick-stats">
+                <h3>إحصائيات سريعة</h3>
+                <div class="form-row">
+                    <div class="form-group" style="background-color: #e8f4f8; padding: 1rem; border-radius: 4px;">
+                        <h4>محاضر الاستلام</h4>
+                        <p id="inspectionCount">0 محضر</p>
+                    </div>
+                    <div class="form-group" style="background-color: #e8f8f0; padding: 1rem; border-radius: 4px;">
+                        <h4>تقارير الموقع</h4>
+                        <p id="reportCount">0 تقرير</p>
+                    </div>
+                    <div class="form-group" style="background-color: #f8f8e8; padding: 1rem; border-radius: 4px;">
+                        <h4>بنود الكميات</h4>
+                        <p id="boqCount">0 بند</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="recent-activities">
+                <h3>آخر الأنشطة</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>النشاط</th>
+                            <th>النوع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activitiesList">
+                        <!-- سيتم ملؤها بالبيانات -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- محضر استلام -->
+        <div id="inspection" class="content">
+            <h2>محضر استلام أعمال</h2>
+            <div class="project-info">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inspectionProject">المشروع:</label>
+                        <input type="text" id="inspectionProject" placeholder="اسم المشروع">
+                    </div>
+                    <div class="form-group">
+                        <label for="inspectionDate">تاريخ المحضر:</label>
+                        <input type="date" id="inspectionDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="inspectionNumber">رقم المحضر:</label>
+                        <input type="text" id="inspectionNumber" placeholder="رقم المحضر">
+                    </div>
+                </div>
+            </div>
+            
+            <table id="inspectionTable">
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th width="25%">البند</th>
+                        <th width="25%">الوصف</th>
+                        <th width="15%">الكمية</th>
+                        <th width="15%">الوحدة</th>
+                        <th width="15%">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>
+                            <select onchange="fillInspectionItem(this)">
+                                <option value="">اختر من المقايسة</option>
+                            </select>
+                        </td>
+                        <td><input type="text" placeholder="وصف البند"></td>
+                        <td><input type="text" placeholder="10"></td>
+                        <td><input type="text" placeholder="م³"></td>
+                        <td><input type="text" placeholder="مطابقة للمواصفات"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addInspectionRow()">إضافة بند</button>
+                <button class="btn btn-danger" onclick="removeInspectionRow()">حذف البند الأخير</button>
+                <button class="btn btn-success" onclick="saveInspection()">حفظ المحضر</button>
+                <button class="btn btn-secondary" onclick="printInspection()">طباعة المحضر</button>
+            </div>
+            
+            <div class="signatures no-print">
+                <h3>التوقيعات</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="contractorName">اسم المقاول:</label>
+                        <input type="text" id="contractorName" placeholder="اسم المقاول">
+                    </div>
+                    <div class="form-group">
+                        <label for="contractorSign">توقيع المقاول:</label>
+                        <canvas id="contractorSign" class="signature-pad" width="300" height="150" style="border:1px solid #ddd;"></canvas>
+                        <button class="btn btn-secondary" onclick="clearSignature('contractorSign')">مسح التوقيع</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="engineerName">اسم المهندس:</label>
+                        <input type="text" id="engineerName" placeholder="اسم المهندس">
+                    </div>
+                    <div class="form-group">
+                        <label for="engineerSign">توقيع المهندس:</label>
+                        <canvas id="engineerSign" class="signature-pad" width="300" height="150" style="border:1px solid #ddd;"></canvas>
+                        <button class="btn btn-secondary" onclick="clearSignature('engineerSign')">مسح التوقيع</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تقرير موقع يومي -->
+        <div id="dailyReport" class="content">
+            <h2>تقرير موقع يومي</h2>
+            <div class="project-info">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="reportProject">المشروع:</label>
+                        <input type="text" id="reportProject" placeholder="اسم المشروع">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportDate">تاريخ التقرير:</label>
+                        <input type="date" id="reportDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportNumber">رقم التقرير:</label>
+                        <input type="text" id="reportNumber" placeholder="رقم التقرير">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="weather">حالة الطقس:</label>
+                        <select id="weather">
+                            <option value="sunny">مشمس</option>
+                            <option value="cloudy">غائم</option>
+                            <option value="rainy">ممطر</option>
+                            <option value="windy">عاصف</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="temperature">درجة الحرارة:</label>
+                        <input type="text" id="temperature" placeholder="درجة الحرارة">
+                    </div>
+                    <div class="form-group">
+                        <label for="reportTime">وقت التقرير:</label>
+                        <input type="time" id="reportTime">
+                    </div>
+                </div>
+            </div>
+            
+            <h3>العمالة</h3>
+            <table id="workersTable">
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th width="25%">نوع العمالة</th>
+                        <th width="20%">العدد</th>
+                        <th width="50%">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" placeholder="نجارين"></td>
+                        <td><input type="number" placeholder="5"></td>
+                        <td><input type="text" placeholder="أعمال الشدات"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addWorkerRow()">إضافة عمالة</button>
+                <button class="btn btn-danger" onclick="removeWorkerRow()">حذف الصف الأخير</button>
+            </div>
+            
+            <h3>المعدات</h3>
+            <table id="equipmentTable">
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th width="25%">نوع المعدة</th>
+                        <th width="20%">العدد</th>
+                        <th width="20%">حالة المعدة</th>
+                        <th width="30%">ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" placeholder="خلاطة خرسانة"></td>
+                        <td><input type="number" placeholder="2"></td>
+                        <td><input type="text" placeholder="جيدة"></td>
+                        <td><input type="text" placeholder="تعمل بكفاءة"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addEquipmentRow()">إضافة معدة</button>
+                <button class="btn btn-danger" onclick="removeEquipmentRow()">حذف الصف الأخير</button>
+            </div>
+            
+            <h3>أعمال اليوم</h3>
+            <table id="activitiesTable">
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th width="30%">نوع العمل</th>
+                        <th width="25%">الموقع</th>
+                        <th width="20%">النسبة المنجزة %</th>
+                        <th width="20%">الصور</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text" placeholder="صب خرسانة"></td>
+                        <td><input type="text" placeholder="القواعد"></td>
+                        <td><input type="number" placeholder="100" min="0" max="100"></td>
+                        <td><input type="file" accept="image/*" style="border:none;"></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addActivityRow()">إضافة عمل</button>
+                <button class="btn btn-danger" onclick="removeActivityRow()">حذف الصف الأخير</button>
+                <button class="btn btn-success" onclick="saveDailyReport()">حفظ التقرير</button>
+                <button class="btn btn-secondary" onclick="printDailyReport()">طباعة التقرير</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="reportNotes">ملاحظات عامة:</label>
+                <textarea id="reportNotes" rows="4" style="width:100%; padding:0.5rem;"></textarea>
+            </div>
+            
+            <div class="signatures no-print">
+                <h3>التوقيعات</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="siteEngineer">مهندس الموقع:</label>
+                        <input type="text" id="siteEngineer" placeholder="اسم مهندس الموقع">
+                    </div>
+                    <div class="form-group">
+                        <label for="siteEngineerSign">توقيع مهندس الموقع:</label>
+                        <canvas id="siteEngineerSign" class="signature-pad" width="300" height="150" style="border:1px solid #ddd;"></canvas>
+                        <button class="btn btn-secondary" onclick="clearSignature('siteEngineerSign')">مسح التوقيع</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول الكميات -->
+        <div id="boq" class="content">
+            <h2>جدول الكميات (BOQ)</h2>
+            <div class="project-info">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="boqProject">المشروع:</label>
+                        <input type="text" id="boqProject" placeholder="اسم المشروع">
+                    </div>
+                    <div class="form-group">
+                        <label for="boqDate">تاريخ الجدول:</label>
+                        <input type="date" id="boqDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="boqCurrency">العملة:</label>
+                        <select id="boqCurrency">
+                            <option value="EGP">جنيه مصري (EGP)</option>
+                            <option value="USD">دولار أمريكي (USD)</option>
+                            <option value="SAR">ريال سعودي (SAR)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <table id="boqTable">
+                <thead>
+                    <tr>
+                        <th width="5%">م</th>
+                        <th width="30%">وصف البند</th>
+                        <th width="10%">الوحدة</th>
+                        <th width="15%">الكمية</th>
+                        <th width="15%">سعر الوحدة</th>
+                        <th width="15%">الإجمالي</th>
+                        <th width="10%">حذف</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>
+                            <select onchange="fillBOQItem(this)">
+                                <option value="">اختر من المقايسة</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="unit"></td>
+                        <td><input type="number" class="quantity" value="0" onchange="calculateBOQTotal()"></td>
+                        <td><input type="number" class="unitPrice" value="0" onchange="calculateBOQTotal()"></td>
+                        <td class="total">0</td>
+                        <td><button class="btn btn-danger" onclick="removeBOQRow(this)">×</button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align:left; font-weight:bold;">المجموع الكلي:</td>
+                        <td id="grandTotal" style="font-weight:bold;">0</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align:left; font-weight:bold;">الضريبة (14%):</td>
+                        <td id="taxAmount" style="font-weight:bold;">0</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" style="text-align:left; font-weight:bold;">الإجمالي بعد الضريبة:</td>
+                        <td id="totalAfterTax" style="font-weight:bold;">0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addBOQRow()">إضافة بند</button>
+                <button class="btn btn-success" onclick="saveBOQ()">حفظ الجدول</button>
+                <button class="btn btn-secondary" onclick="printBOQ()">طباعة الجدول</button>
+                <button class="btn btn-secondary" onclick="exportToExcel()">تصدير لإكسل</button>
+            </div>
+        </div>
+
+        <!-- بنود المقايسة -->
+        <div id="boqItems" class="content">
+            <h2>إدارة بنود المقايسة</h2>
+            
+            <div class="form-group">
+                <label>استيراد بنود من ملف Excel:</label>
+                <input type="file" id="excelFile" accept=".xlsx, .xls" class="no-print">
+                <button class="btn btn-primary" onclick="importExcel()">استيراد البيانات</button>
+                <p>ملاحظة: يجب أن يحتوي الملف على الأعمدة التالية: رقم البند، اسم البند، الوحدة، الكمية، السعر</p>
+            </div>
+            
+            <table id="boqItemsTable">
+                <thead>
+                    <tr>
+                        <th>رقم البند</th>
+                        <th>اسم البند</th>
+                        <th>الوحدة</th>
+                        <th>الكمية</th>
+                        <th>السعر</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملؤها بالبيانات -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- التقارير -->
+        <div id="reports" class="content">
+            <h2>التقارير</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reportType">نوع التقرير:</label>
+                    <select id="reportType" onchange="updateReportFilters()">
+                        <option value="inspection">محاضر الاستلام</option>
+                        <option value="daily">تقارير الموقع</option>
+                        <option value="boq">جداول الكميات</option>
+                        <option value="boqItems">بنود المقايسة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportProjectFilter">المشروع:</label>
+                    <select id="reportProjectFilter">
+                        <option value="all">جميع المشاريع</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reportDateFrom">من تاريخ:</label>
+                    <input type="date" id="reportDateFrom">
+                </div>
+                <div class="form-group">
+                    <label for="reportDateTo">إلى تاريخ:</label>
+                    <input type="date" id="reportDateTo">
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="generateReport()">إنشاء التقرير</button>
+                <button class="btn btn-secondary" onclick="printReport()">طباعة التقرير</button>
+            </div>
+            
+            <div id="reportResults" style="margin-top:2rem;">
+                <!-- سيتم عرض النتائج هنا -->
+            </div>
+        </div>
+
+        <!-- الإعدادات -->
+        <div id="settings" class="content">
+            <h2>الإعدادات</h2>
+            <div class="form-group">
+                <label for="companyName">اسم الشركة:</label>
+                <input type="text" id="companyName" placeholder="أدخل اسم الشركة">
+            </div>
+            <div class="form-group">
+                <label for="companyLogo">شعار الشركة:</label>
+                <input type="file" id="companyLogo" accept="image/*">
+                <img id="logoPreview" src="" alt="شعار الشركة" style="max-width:200px; margin-top:1rem; display:none;">
+            </div>
+            <div class="form-group">
+                <label for="defaultCurrency">العملة الافتراضية:</label>
+                <select id="defaultCurrency">
+                    <option value="EGP">جنيه مصري (EGP)</option>
+                    <option value="USD">دولار أمريكي (USD)</option>
+                    <option value="SAR">ريال سعودي (SAR)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="taxRate">معدل الضريبة (%):</label>
+                <input type="number" id="taxRate" value="14" min="0" max="100">
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="saveSettings()">حفظ الإعدادات</button>
+                <button class="btn btn-danger" onclick="resetSettings()">إعادة الضبط</button>
+                <button class="btn btn-secondary" onclick="backupData()">إنشاء نسخة احتياطية</button>
+                <button class="btn btn-secondary" onclick="restoreData()">استعادة بيانات</button>
+            </div>
+            
+            <div class="form-group" style="margin-top:2rem;">
+                <h3>حول البرنامج</h3>
+                <p>إصدار البرنامج: 2.1.0</p>
+                <p>تم التطوير بواسطة: فريق الهندسة المدنية</p>
+                <p>© 2023 جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // متغيرات التطبيق
+        let currentProject = {};
+        let inspections = [];
+        let dailyReports = [];
+        let boqs = [];
+        let boqItems = [];
+        let activities = [];
+        let settings = {
+            companyName: "شركة الهندسة المدنية",
+            defaultCurrency: "EGP",
+            taxRate: 14
+        };
+        
+        // تهيئة التطبيق عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل البيانات المحفوظة
+            loadData();
+            
+            // عرض لوحة التحكم عند البدء
+            showContent('dashboard');
+            
+            // تهيئة لوحات التوقيع
+            initSignaturePads();
+            
+            // تحديث الإحصائيات
+            updateStats();
+            
+            // تعيين التاريخ الحالي كافتراضي
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inspectionDate').value = today;
+            document.getElementById('reportDate').value = today;
+            document.getElementById('boqDate').value = today;
+            document.getElementById('reportDateFrom').value = today;
+            document.getElementById('reportDateTo').value = today;
+            
+            // تحميل مكتبة SheetJS ديناميكياً
+            loadSheetJS();
+            
+            // تحديث قوائم البنود في الجداول
+            updateBOQItemsDropdowns();
+        });
+        
+        // وظائف التطبيق الأساسية
+        function showContent(contentId) {
+            // إخفاء جميع المحتويات
+            document.querySelectorAll('.content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // إزالة التنشيط من جميع أزرار القائمة
+            document.querySelectorAll('.menu button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // عرض المحتوى المحدد
+            document.getElementById(contentId).style.display = 'block';
+            
+            // تنشيط زر القائمة المحدد
+            event.target.classList.add('active');
+        }
+        
+        function loadData() {
+            // تحميل البيانات من localStorage
+            if (localStorage.getItem('currentProject')) {
+                currentProject = JSON.parse(localStorage.getItem('currentProject'));
+                document.getElementById('currentProject').value = currentProject.name || '';
+                document.getElementById('projectLocation').value = currentProject.location || '';
+                document.getElementById('projectClient').value = currentProject.client || '';
+                document.getElementById('projectStart').value = currentProject.startDate || '';
+                document.getElementById('projectEnd').value = currentProject.endDate || '';
+                document.getElementById('projectStatus').value = currentProject.status || 'planning';
+            }
+            
+            if (localStorage.getItem('inspections')) {
+                inspections = JSON.parse(localStorage.getItem('inspections'));
+            }
+            
+            if (localStorage.getItem('dailyReports')) {
+                dailyReports = JSON.parse(localStorage.getItem('dailyReports'));
+            }
+            
+            if (localStorage.getItem('boqs')) {
+                boqs = JSON.parse(localStorage.getItem('boqs'));
+            }
+            
+            if (localStorage.getItem('boqItems')) {
+                boqItems = JSON.parse(localStorage.getItem('boqItems'));
+                displayBOQItems();
+            }
+            
+            if (localStorage.getItem('activities')) {
+                activities = JSON.parse(localStorage.getItem('activities'));
+            }
+            
+            if (localStorage.getItem('settings')) {
+                settings = JSON.parse(localStorage.getItem('settings'));
+                document.getElementById('companyName').value = settings.companyName || '';
+                document.getElementById('defaultCurrency').value = settings.defaultCurrency || 'EGP';
+                document.getElementById('taxRate').value = settings.taxRate || 14;
+            }
+        }
+        
+        function saveData() {
+            // حفظ البيانات في localStorage
+            localStorage.setItem('currentProject', JSON.stringify(currentProject));
+            localStorage.setItem('inspections', JSON.stringify(inspections));
+            localStorage.setItem('dailyReports', JSON.stringify(dailyReports));
+            localStorage.setItem('boqs', JSON.stringify(boqs));
+            localStorage.setItem('boqItems', JSON.stringify(boqItems));
+            localStorage.setItem('activities', JSON.stringify(activities));
+            localStorage.setItem('settings', JSON.stringify(settings));
+        }
+        
+        function updateStats() {
+            // تحديث الإحصائيات في لوحة التحكم
+            document.getElementById('inspectionCount').textContent = inspections.length + ' محضر';
+            document.getElementById('reportCount').textContent = dailyReports.length + ' تقرير';
+            document.getElementById('boqCount').textContent = boqs.reduce((total, boq) => total + boq.items.length, 0) + ' بند';
+            
+            // تحديث قائمة الأنشطة
+            const activitiesList = document.getElementById('activitiesList');
+            activitiesList.innerHTML = '';
+            
+            // دمج جميع الأنشطة وفرزها حسب التاريخ
+            const allActivities = [
+                ...inspections.map(i => ({ type: 'محضر استلام', date: i.date, desc: i.project })),
+                ...dailyReports.map(r => ({ type: 'تقرير موقع', date: r.date, desc: r.project })),
+                ...boqs.map(b => ({ type: 'جدول كميات', date: b.date, desc: b.project })),
+                ...(activities || [])
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+            
+            allActivities.forEach(activity => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.date}</td>
+                    <td>${activity.desc}</td>
+                    <td>${activity.type}</td>
+                `;
+                activitiesList.appendChild(row);
+            });
+        }
+        
+        // وظائف بنود المقايسة
+        function loadSheetJS() {
+            return new Promise((resolve) => {
+                if (typeof XLSX === 'undefined') {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                } else {
+                    resolve();
+                }
+            });
+        }
+        
+        function importExcel() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('الرجاء اختيار ملف Excel أولاً');
+                return;
+            }
+            
+            loadSheetJS().then(() => {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                        
+                        const headers = jsonData[0];
+                        const items = [];
+                        
+                        for (let i = 1; i < jsonData.length; i++) {
+                            const row = jsonData[i];
+                            if (row.length >= 5) {
+                                items.push({
+                                    id: row[0] || i,
+                                    name: row[1] || '',
+                                    unit: row[2] || '',
+                                    quantity: row[3] || 0,
+                                    price: row[4] || 0,
+                                    total: (parseFloat(row[3]) || 0) * (parseFloat(row[4]) || 0)
+                                });
+                            }
+                        }
+                        
+                        boqItems = items;
+                        localStorage.setItem('boqItems', JSON.stringify(boqItems));
+                        displayBOQItems();
+                        updateBOQItemsDropdowns();
+                        
+                        alert(`تم استيراد ${items.length} بند بنجاح`);
+                        showContent('boqItems');
+                    } catch (error) {
+                        alert('حدث خطأ أثناء قراءة الملف: ' + error.message);
+                    }
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        function displayBOQItems() {
+            const tbody = document.querySelector('#boqItemsTable tbody');
+            tbody.innerHTML = '';
+            
+            boqItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.unit}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price}</td>
+                    <td>${item.total.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function updateBOQItemsDropdowns() {
+            const dropdowns = document.querySelectorAll('select[onchange*="fillBOQItem"], select[onchange*="fillInspectionItem"]');
+            
+            dropdowns.forEach(dropdown => {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = '<option value="">اختر من المقايسة</option>' + 
+                    boqItems.map(item => 
+                        `<option value="${item.id}">${item.id} - ${item.name} (${item.unit})</option>`
+                    ).join('');
+                
+                if (currentValue) {
+                    dropdown.value = currentValue;
+                }
+            });
+        }
+        
+        function fillBOQItem(select) {
+            const itemId = select.value;
+            const item = boqItems.find(i => i.id == itemId);
+            const row = select.closest('tr');
+            
+            if (item && row) {
+                row.querySelector('.unit').value = item.unit;
+                row.querySelector('.quantity').value = item.quantity;
+                row.querySelector('.unitPrice').value = item.price;
+                calculateBOQTotal();
+            }
+        }
+        
+        function fillInspectionItem(select) {
+            const itemId = select.value;
+            const item = boqItems.find(i => i.id == itemId);
+            const row = select.closest('tr');
+            
+            if (item && row) {
+                const inputs = row.querySelectorAll('input[type="text"]');
+                if (inputs.length >= 3) {
+                    inputs[1].value = item.name; // الوصف
+                    inputs[0].value = item.quantity; // الكمية
+                    inputs[2].value = item.unit; // الوحدة
+                }
+            }
+        }
+        
+        // وظائف لوحة التحكم
+        function saveProjectInfo() {
+            currentProject = {
+                name: document.getElementById('currentProject').value,
+                location: document.getElementById('projectLocation').value,
+                client: document.getElementById('projectClient').value,
+                startDate: document.getElementById('projectStart').value,
+                endDate: document.getElementById('projectEnd').value,
+                status: document.getElementById('projectStatus').value
+            };
+            
+            saveData();
+            alert('تم حفظ معلومات المشروع بنجاح');
+        }
+        
+        // وظائف محاضر الاستلام
+        function addInspectionRow() {
+            const table = document.getElementById('inspectionTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const rowCount = table.rows.length;
+            
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td>
+                    <select onchange="fillInspectionItem(this)">
+                        <option value="">اختر من المقايسة</option>
+                        ${boqItems.map(item => 
+                            `<option value="${item.id}">${item.id} - ${item.name} (${item.unit})</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td><input type="text" placeholder="وصف البند"></td>
+                <td><input type="text" placeholder="10"></td>
+                <td><input type="text" placeholder="م³"></td>
+                <td><input type="text" placeholder="مطابقة للمواصفات"></td>
+            `;
+        }
+        
+        function removeInspectionRow() {
+            const table = document.getElementById('inspectionTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) {
+                table.deleteRow(table.rows.length - 1);
+            } else {
+                alert('لا يمكن حذف كل الصفوف!');
+            }
+        }
+        
+        function saveInspection() {
+            const project = document.getElementById('inspectionProject').value;
+            const date = document.getElementById('inspectionDate').value;
+            const number = document.getElementById('inspectionNumber').value;
+            const contractorName = document.getElementById('contractorName').value;
+            const engineerName = document.getElementById('engineerName').value;
+            
+            if (!project || !date || !number) {
+                alert('الرجاء إدخال جميع البيانات المطلوبة');
+                return;
+            }
+            
+            // جمع بيانات البنود
+            const items = [];
+            const rows = document.getElementById('inspectionTable').rows;
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].cells;
+                const select = cells[1].querySelector('select');
+                const selectedItem = select ? boqItems.find(item => item.id == select.value) : null;
+                
+                items.push({
+                    itemId: selectedItem ? selectedItem.id : '',
+                    item: cells[1].getElementsByTagName('input')[0]?.value || 
+                          (selectedItem ? selectedItem.name : ''),
+                    description: cells[2].getElementsByTagName('input')[0].value,
+                    quantity: cells[3].getElementsByTagName('input')[0].value,
+                    unit: cells[4].getElementsByTagName('input')[0].value,
+                    notes: cells[5].getElementsByTagName('input')[0].value
+                });
+            }
+            
+            // حفظ المحضر
+            const inspection = {
+                id: Date.now(),
+                project,
+                date,
+                number,
+                contractorName,
+                engineerName,
+                items,
+                createdAt: new Date().toISOString()
+            };
+            
+            inspections.push(inspection);
+            activities.push({
+                type: 'inspection',
+                action: 'create',
+                project,
+                date: new Date().toISOString()
+            });
+            
+            saveData();
+            updateStats();
+            alert('تم حفظ محضر الاستلام بنجاح');
+        }
+        
+        function printInspection() {
+            window.print();
+        }
+        
+        // وظائف تقارير الموقع اليومي
+        function addWorkerRow() {
+            const table = document.getElementById('workersTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const rowCount = table.rows.length;
+            
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td><input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="text"></td>
+            `;
+        }
+        
+        function removeWorkerRow() {
+            const table = document.getElementById('workersTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) {
+                table.deleteRow(table.rows.length - 1);
+            }
+        }
+        
+        function addEquipmentRow() {
+            const table = document.getElementById('equipmentTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const rowCount = table.rows.length;
+            
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td><input type="text"></td>
+                <td><input type="number"></td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+            `;
+        }
+        
+        function removeEquipmentRow() {
+            const table = document.getElementById('equipmentTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) {
+                table.deleteRow(table.rows.length - 1);
+            }
+        }
+        
+        function addActivityRow() {
+            const table = document.getElementById('activitiesTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const rowCount = table.rows.length;
+            
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td><input type="text"></td>
+                <td><input type="text"></td>
+                <td><input type="number" min="0" max="100"></td>
+                <td><input type="file" accept="image/*" style="border:none;"></td>
+            `;
+        }
+        
+        function removeActivityRow() {
+            const table = document.getElementById('activitiesTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) {
+                table.deleteRow(table.rows.length - 1);
+            }
+        }
+        
+        function saveDailyReport() {
+            const project = document.getElementById('reportProject').value;
+            const date = document.getElementById('reportDate').value;
+            const number = document.getElementById('reportNumber').value;
+            const weather = document.getElementById('weather').value;
+            const temperature = document.getElementById('temperature').value;
+            const time = document.getElementById('reportTime').value;
+            const notes = document.getElementById('reportNotes').value;
+            const siteEngineer = document.getElementById('siteEngineer').value;
+            
+            if (!project || !date || !number || !siteEngineer) {
+                alert('الرجاء إدخال جميع البيانات المطلوبة');
+                return;
+            }
+            
+            // جمع بيانات العمالة
+            const workers = [];
+            const workerRows = document.getElementById('workersTable').rows;
+            for (let i = 1; i < workerRows.length; i++) {
+                const cells = workerRows[i].cells;
+                workers.push({
+                    type: cells[1].getElementsByTagName('input')[0].value,
+                    count: cells[2].getElementsByTagName('input')[0].value,
+                    notes: cells[3].getElementsByTagName('input')[0].value
+                });
+            }
+            
+            // جمع بيانات المعدات
+            const equipment = [];
+            const equipmentRows = document.getElementById('equipmentTable').rows;
+            for (let i = 1; i < equipmentRows.length; i++) {
+                const cells = equipmentRows[i].cells;
+                equipment.push({
+                    type: cells[1].getElementsByTagName('input')[0].value,
+                    count: cells[2].getElementsByTagName('input')[0].value,
+                    condition: cells[3].getElementsByTagName('input')[0].value,
+                    notes: cells[4].getElementsByTagName('input')[0].value
+                });
+            }
+            
+            // جمع بيانات الأعمال
+            const siteActivities = [];
+            const activityRows = document.getElementById('activitiesTable').rows;
+            for (let i = 1; i < activityRows.length; i++) {
+                const cells = activityRows[i].cells;
+                const fileInput = cells[4].querySelector('input[type="file"]');
+                const fileName = fileInput?.files[0]?.name || '';
+                
+                siteActivities.push({
+                    type: cells[1].getElementsByTagName('input')[0].value,
+                    location: cells[2].getElementsByTagName('input')[0].value,
+                    progress: cells[3].getElementsByTagName('input')[0].value,
+                    image: fileName
+                });
+            }
+            
+            // حفظ التقرير
+            const report = {
+                id: Date.now(),
+                project,
+                date,
+                number,
+                weather,
+                temperature,
+                time,
+                workers,
+                equipment,
+                activities: siteActivities,
+                notes,
+                siteEngineer,
+                createdAt: new Date().toISOString()
+            };
+            
+            dailyReports.push(report);
+            activities.push({
+                type: 'dailyReport',
+                action: 'create',
+                project,
+                date: new Date().toISOString()
+            });
+            
+            saveData();
+            updateStats();
+            alert('تم حفظ تقرير الموقع بنجاح');
+        }
+        
+        function printDailyReport() {
+            window.print();
+        }
+        
+        // وظائف جدول الكميات
+        function addBOQRow() {
+            const table = document.getElementById('boqTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const rowCount = table.rows.length;
+            
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td>
+                    <select onchange="fillBOQItem(this)">
+                        <option value="">اختر من المقايسة</option>
+                        ${boqItems.map(item => 
+                            `<option value="${item.id}">${item.id} - ${item.name} (${item.unit})</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td><input type="text" class="unit"></td>
+                <td><input type="number" class="quantity" value="0" onchange="calculateBOQTotal()"></td>
+                <td><input type="number" class="unitPrice" value="0" onchange="calculateBOQTotal()"></td>
+                <td class="total">0</td>
+                <td><button class="btn btn-danger" onclick="removeBOQRow(this)">×</button></td>
+            `;
+        }
+        
+        function removeBOQRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            calculateBOQTotal();
+        }
+        
+        function calculateBOQTotal() {
+            let grandTotal = 0;
+            const rows = document.getElementById('boqTable').getElementsByTagName('tbody')[0].rows;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const quantity = parseFloat(rows[i].querySelector('.quantity').value) || 0;
+                const unitPrice = parseFloat(rows[i].querySelector('.unitPrice').value) || 0;
+                const total = quantity * unitPrice;
+                rows[i].querySelector('.total').textContent = total.toFixed(2);
+                grandTotal += total;
+            }
+            
+            const taxRate = settings.taxRate || 0;
+            const taxAmount = grandTotal * (taxRate / 100);
+            const totalAfterTax = grandTotal + taxAmount;
+            
+            document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
+            document.getElementById('taxAmount').textContent = taxAmount.toFixed(2);
+            document.getElementById('totalAfterTax').textContent = totalAfterTax.toFixed(2);
+        }
+        
+        function saveBOQ() {
+            const project = document.getElementById('boqProject').value;
+            const date = document.getElementById('boqDate').value;
+            const currency = document.getElementById('boqCurrency').value;
+            
+            if (!project || !date) {
+                alert('الرجاء إدخال جميع البيانات المطلوبة');
+                return;
+            }
+            
+            // جمع بيانات البنود
+            const items = [];
+            const rows = document.getElementById('boqTable').getElementsByTagName('tbody')[0].rows;
+            for (let i = 0; i < rows.length; i++) {
+                const select = rows[i].cells[1].querySelector('select');
+                const selectedItem = select ? boqItems.find(item => item.id == select.value) : null;
+                
+                items.push({
+                    itemId: selectedItem ? selectedItem.id : '',
+                    description: selectedItem ? selectedItem.name : rows[i].cells[1].textContent,
+                    unit: rows[i].querySelector('.unit').value,
+                    quantity: parseFloat(rows[i].querySelector('.quantity').value) || 0,
+                    unitPrice: parseFloat(rows[i].querySelector('.unitPrice').value) || 0,
+                    total: parseFloat(rows[i].querySelector('.total').textContent) || 0
+                });
+            }
+            
+            if (items.length === 0) {
+                alert('الرجاء إضافة بنود إلى الجدول');
+                return;
+            }
+            
+            // حفظ جدول الكميات
+            const boq = {
+                id: Date.now(),
+                project,
+                date,
+                currency,
+                items,
+                grandTotal: parseFloat(document.getElementById('grandTotal').textContent) || 0,
+                taxAmount: parseFloat(document.getElementById('taxAmount').textContent) || 0,
+                totalAfterTax: parseFloat(document.getElementById('totalAfterTax').textContent) || 0,
+                createdAt: new Date().toISOString()
+            };
+            
+            boqs.push(boq);
+            activities.push({
+                type: 'boq',
+                action: 'create',
+                project,
+                date: new Date().toISOString()
+            });
+            
+            saveData();
+            updateStats();
+            alert('تم حفظ جدول الكميات بنجاح');
+        }
+        
+        function printBOQ() {
+            window.print();
+        }
+        
+        function exportToExcel() {
+            loadSheetJS().then(() => {
+                const table = document.getElementById('boqTable');
+                const ws = XLSX.utils.table_to_sheet(table);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "جدول الكميات");
+                
+                const projectName = document.getElementById('boqProject').value || 'جدول الكميات';
+                const date = document.getElementById('boqDate').value || new Date().toISOString().slice(0, 10);
+                const fileName = `جدول الكميات - ${projectName} - ${date}.xlsx`;
+                
+                XLSX.writeFile(wb, fileName);
+            });
+        }
+        
+        // وظائف التقارير
+        function updateReportFilters() {
+            const reportType = document.getElementById('reportType').value;
+            const projectFilter = document.getElementById('reportProjectFilter');
+            
+            // يمكن تطوير هذه الوظيفة لتحديث عوامل التصفية حسب نوع التقرير
+        }
+        
+        function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const project = document.getElementById('reportProjectFilter').value;
+            const dateFrom = document.getElementById('reportDateFrom').value;
+            const dateTo = document.getElementById('reportDateTo').value;
+            
+            let reportData = [];
+            let reportTitle = '';
+            
+            switch (reportType) {
+                case 'inspection':
+                    reportData = inspections;
+                    reportTitle = 'محاضر الاستلام';
+                    break;
+                case 'daily':
+                    reportData = dailyReports;
+                    reportTitle = 'تقارير الموقع اليومية';
+                    break;
+                case 'boq':
+                    reportData = boqs;
+                    reportTitle = 'جداول الكميات';
+                    break;
+                case 'boqItems':
+                    reportData = boqItems;
+                    reportTitle = 'بنود المقايسة';
+                    break;
+            }
+            
+            // تطبيق الفلاتر
+            if (project !== 'all') {
+                reportData = reportData.filter(item => item.project === project);
+            }
+            
+            if (dateFrom && dateTo) {
+                reportData = reportData.filter(item => {
+                    return item.date >= dateFrom && item.date <= dateTo;
+                });
+            }
+            
+            // عرض النتائج
+            const resultsDiv = document.getElementById('reportResults');
+            resultsDiv.innerHTML = `
+                <h3>${reportTitle} - النتائج</h3>
+                <p>عدد السجلات: ${reportData.length}</p>
+            `;
+            
+            if (reportData.length > 0) {
+                const table = document.createElement('table');
+                table.className = 'report-table';
+                
+                // إنشاء رأس الجدول حسب نوع التقرير
+                let tableHeaders = '';
+                if (reportType === 'inspection') {
+                    tableHeaders = `
+                        <tr>
+                            <th>رقم المحضر</th>
+                            <th>المشروع</th>
+                            <th>التاريخ</th>
+                            <th>عدد البنود</th>
+                        </tr>
+                    `;
+                } else if (reportType === 'daily') {
+                    tableHeaders = `
+                        <tr>
+                            <th>رقم التقرير</th>
+                            <th>المشروع</th>
+                            <th>التاريخ</th>
+                            <th>مهندس الموقع</th>
+                        </tr>
+                    `;
+                } else if (reportType === 'boq') {
+                    tableHeaders = `
+                        <tr>
+                            <th>رقم الجدول</th>
+                            <th>المشروع</th>
+                            <th>التاريخ</th>
+                            <th>عدد البنود</th>
+                            <th>الإجمالي</th>
+                        </tr>
+                    `;
+                } else if (reportType === 'boqItems') {
+                    tableHeaders = `
+                        <tr>
+                            <th>رقم البند</th>
+                            <th>اسم البند</th>
+                            <th>الوحدة</th>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                            <th>الإجمالي</th>
+                        </tr>
+                    `;
+                }
+                
+                table.innerHTML = tableHeaders;
+                
+                // ملء الجدول بالبيانات
+                reportData.forEach(item => {
+                    let row = '';
+                    if (reportType === 'inspection') {
+                        row = `
+                            <tr>
+                                <td>${item.number}</td>
+                                <td>${item.project}</td>
+                                <td>${item.date}</td>
+                                <td>${item.items.length}</td>
+                            </tr>
+                        `;
+                    } else if (reportType === 'daily') {
+                        row = `
+                            <tr>
+                                <td>${item.number}</td>
+                                <td>${item.project}</td>
+                                <td>${item.date}</td>
+                                <td>${item.siteEngineer}</td>
+                            </tr>
+                        `;
+                    } else if (reportType === 'boq') {
+                        row = `
+                            <tr>
+                                <td>${item.id}</td>
+                                <td>${item.project}</td>
+                                <td>${item.date}</td>
+                                <td>${item.items.length}</td>
+                                <td>${item.totalAfterTax.toFixed(2)} ${item.currency}</td>
+                            </tr>
+                        `;
+                    } else if (reportType === 'boqItems') {
+                        row = `
+                            <tr>
+                                <td>${item.id}</td>
+                                <td>${item.name}</td>
+                                <td>${item.unit}</td>
+                                <td>${item.quantity}</td>
+                                <td>${item.price}</td>
+                                <td>${item.total.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                    
+                    table.innerHTML += row;
+                });
+                
+                resultsDiv.appendChild(table);
+            }
+        }
+        
+        function printReport() {
+            window.print();
+        }
+        
+        // وظائف الإعدادات
+        function saveSettings() {
+            settings = {
+                companyName: document.getElementById('companyName').value,
+                defaultCurrency: document.getElementById('defaultCurrency').value,
+                taxRate: parseFloat(document.getElementById('taxRate').value) || 0
+            };
+            
+            saveData();
+            alert('تم حفظ الإعدادات بنجاح');
+        }
+        
+        function resetSettings() {
+            if (confirm('هل أنت متأكد من أنك تريد إعادة تعيين جميع الإعدادات إلى القيم الافتراضية؟')) {
+                settings = {
+                    companyName: "شركة الهندسة المدنية",
+                    defaultCurrency: "EGP",
+                    taxRate: 14
+                };
+                
+                document.getElementById('companyName').value = settings.companyName;
+                document.getElementById('defaultCurrency').value = settings.defaultCurrency;
+                document.getElementById('taxRate').value = settings.taxRate;
+                
+                saveData();
+                alert('تم إعادة تعيين الإعدادات بنجاح');
+            }
+        }
+        
+        function backupData() {
+            const data = {
+                currentProject,
+                inspections,
+                dailyReports,
+                boqs,
+                boqItems,
+                activities,
+                settings
+            };
+            
+            const dataStr = JSON.stringify(data);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportName = 'engineering-office-backup-' + new Date().toISOString().slice(0,10) + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportName);
+            linkElement.click();
+            
+            alert('تم إنشاء نسخة احتياطية بنجاح');
+        }
+        
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        if (confirm('هل أنت متأكد من أنك تريد استعادة النسخة الاحتياطية؟ سيتم استبدال جميع البيانات الحالية.')) {
+                            currentProject = data.currentProject || {};
+                            inspections = data.inspections || [];
+                            dailyReports = data.dailyReports || [];
+                            boqs = data.boqs || [];
+                            boqItems = data.boqItems || [];
+                            activities = data.activities || [];
+                            settings = data.settings || {
+                                companyName: "شركة الهندسة المدنية",
+                                defaultCurrency: "EGP",
+                                taxRate: 14
+                            };
+                            
+                            saveData();
+                            loadData();
+                            updateStats();
+                            updateBOQItemsDropdowns();
+                            
+                            alert('تم استعادة النسخة الاحتياطية بنجاح');
+                        }
+                    } catch (error) {
+                        alert('خطأ في قراءة ملف النسخة الاحتياطية: ' + error.message);
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // وظائف التوقيعات
+        function initSignaturePads() {
+            // يمكن تطوير هذه الوظيفة لاستخدام مكتبة التوقيعات لاحقًا
+        }
+        
+        function clearSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
